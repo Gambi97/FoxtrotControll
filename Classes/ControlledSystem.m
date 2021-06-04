@@ -74,8 +74,8 @@ classdef ControlledSystem < handle
             xlabel('Time');
             ylabel('Torque');
             grid on
-            for is=1:20
-                [IAE(is),OV(is),CE(is),settling_time(is),results(is)]=simulation(obj,is+1);
+            for is=1:1
+                [IAE(is), OV(is), CE(is), settling_time(is), results(is)]=simulation(obj,is+1);
                 subplot(2,1,1)
                 plot(results(is).t,results(is).y(:,obj.goal_output),'k');
                 hold on
