@@ -1,7 +1,7 @@
 classdef BaseController < handle
     properties  (Access = protected)
-        st
-        umax
+        st      % Tempo di campionamento
+        umax    % Saturazione azione di controllo
     end
     methods
         function obj=BaseController(st)

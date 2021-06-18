@@ -1,2 +1,0 @@
-# FoxtrotControll
-come va?

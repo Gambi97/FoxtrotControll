@@ -1,0 +1,90 @@
+classdef SSController < BaseController 
+    % SSController crea un controllore nello spazio degli stati per un
+    % sistema con 4 stati, retroazione degli stati e errore integrale.
+    properties  (Access = protected)
+        
+        u       % azione di controllo
+        xHat    % stato stimato
+        xi      % stato aumentato (errore) stimato
+        K       % vettore di retroazione dello stato
+        H       % guadagno errore integrale
+        af      % filtro sul set point
+        rf      % riferimento filtrato 
+        OBS     % oggetto osservatore
+        
+    end
+    
+    methods
+        
+        function obj = SSController(st, K, H, umax, L, A, B, C, Tf)
+            
+            obj@BaseController(st);
+            obj.K = K;
+            obj.H = H;
+            obj.umax = umax;
+            obj.af=exp(-obj.st/Tf);
+            obj.OBS = SSObserver(L, A, B, C);
+            
+        end
+        
+        function initialize(obj)
+            
+            obj.OBS.initialize;           
+            obj.xHat = NaN;
+            obj.xi= NaN;
+            obj.u = NaN;
+            obj.rf = NaN;
+            
+        end
+        
+        function u_next = computeControlAction(obj, reference, y)
+            
+            % assegno posizione (non serve velocità)
+            y = y(1);
+            
+            % primo ciclo
+            if isnan(obj.rf)
+                
+                obj.u = 0;
+                obj.xHat = zeros(4, 1); % 4 stati osservatore
+                obj.rf = 0;
+                obj.xi= 0;
+                
+            else
+                 
+                rf_new = obj.af*obj.rf+(1-obj.af)*reference;
+                obj.rf = rf_new;
+                
+            end
+            
+            % calcolo stato stimato dall' osservatore
+            x_next = obj.OBS.computeObserver(obj.u, y);
+            
+            % errore attuale
+            e_y = obj.rf-y;
+            
+            % azione di controllo:
+            xi_next = obj.xi + obj.st*e_y;
+            u_next = obj.H*obj.xi - obj.K*obj.xHat(1:end);
+            
+            % saturazione azione di controllo, implemento anti-windup
+            % azione integrale
+            if (u_next > obj.umax)
+                usat = obj.umax;
+                xi_next = obj.xi;
+            elseif (u_next < -obj.umax)
+                usat = -obj.umax;
+                xi_next = obj.xi;
+            else
+                usat = u_next;
+            end
+            u_next = usat;
+            
+            % aggiorno variabili
+            obj.xi =  xi_next;
+            obj.u = u_next;
+            obj.xHat = x_next;
+            
+        end
+    end
+end

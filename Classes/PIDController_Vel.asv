@@ -1,0 +1,62 @@
+classdef PIDController_Vel < BaseController 
+    properties  (Access = protected)
+        u_1 % azione di controllo istante k-1
+        u_2 % azione di controllo istante k-2
+        Kp
+        Ki
+        Kd
+        N 
+        e_1 % errore istante k-1
+        e_2 % errore istante k-2
+        af
+        r
+    end
+    methods
+        function obj=PIDController_Vel(st, Kp, Ki, Kd, N)
+            obj@BaseController(st);
+            obj.u_1 = 0;
+            obj.u_2 = 0;
+            obj.Kp = Kp;
+            obj.Ki = Ki;
+            obj.Kd = Kd;
+            obj.N = N;
+            obj.e_1 = 0;
+            obj.e_2 = 0;
+            obj.r = NaN;
+        end
+        function inizialize(obj)
+            obj.r=nan; 
+            obj.u_1 = 0;
+            obj.u_2 = 0;
+            obj.e_1 = 0;
+            obj.e_2 = 0;
+        end
+        function u=computeControlAction(obj,reference,y)
+
+            if isnan(obj.r)
+                obj.r = y;
+            else
+                r_new = reference;
+                obj.r = r_new;
+            end
+            
+            e_y=obj.r-y;
+            
+%             K1 = obj.Kp + obj.Ki*obj.st + obj.Kd/obj.st;
+%             K2 = - obj.Kp - 2*obj.Kd/obj.st;
+%             K3 = obj.Kd/obj.st;
+%             u = obj.u_1 + K1*e_y + K2*obj.e_1 + K3*obj.e_2;
+            % filtro derivativo 
+            a0 = 1 + obj.N*obj.st;
+            a1 = -2 -obj.N*obj.st;      
+            a2 = 1;
+            b0 = obj.Kp*(1+
+            b1 = 
+            b2 = 
+            obj.u_2 = obj.u_1
+            obj.u_1 = u;
+            obj.e_2 = obj.e_1;
+            obj.e_1 = e_y;
+        end
+    end
+end
