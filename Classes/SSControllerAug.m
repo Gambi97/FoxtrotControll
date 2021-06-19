@@ -70,13 +70,19 @@ classdef SSControllerAug < BaseController
             u_next = obj.H*obj.xi - obj.K*obj.xHat(1:end-1);
             
             % saturazione azione di controllo, implemento anti-windup
-            % azione integrale
-            if (u_next > obj.umax)
+            % azione integrale. Congelo azione integrale solo se favorisce
+            % il wind-up (se u e e_y sono concordi)
+
+            if u_next > obj.umax
                 usat = obj.umax;
-                xi_next = obj.xi;
-            elseif (u_next < -obj.umax)
+                if u_next*e_y >= 0
+                    xi_next = obj.xi;
+                end
+            elseif u_next < -obj.umax
                 usat = -obj.umax;
-                xi_next = obj.xi;
+                if u_next*e_y >= 0
+                    xi_next = obj.xi;
+                end
             else
                 usat = u_next;
             end

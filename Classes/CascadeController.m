@@ -15,8 +15,8 @@ classdef CascadeController < BaseController
         function obj = CascadeController(st, Tf, Kp1, Kp2, Ki1, Ki2, Kd1, Kd2, Tf1, Tf2, umax)
             obj@BaseController(st);
             obj.umax = umax;
-            obj.C1 = PIDFiltered(st, Kp1, Ki1, Kd1, Tf1, umax, false);
-            obj.C2 = PIDFiltered(st, Kp2, Ki2, Kd2, Tf2, umax, true);
+            obj.C1 = PIDController(st, Kp1, Ki1, Kd1, Tf1, umax, false);
+            obj.C2 = PIDController(st, Kp2, Ki2, Kd2, Tf2, umax, true);
             obj.af=exp(-obj.st/Tf); % polo filtro primo ordine digitale
         end
         
